@@ -1,0 +1,8 @@
+<launch>
+  <!-- - click and save test passed -->
+  <node pkg="grid_map_utils" type="test_ogm_saver_node.py" name="ogm_saver"  output="screen">
+    <!-- <param name="ogm_topic" value="/erl_costmap_ros/costmap_rviz"/> -->
+    <!-- <param name="ogm_topic" value="/costmap"/>     -->
+    <param name="ogm_topic" value="/map"/>
+  </node>
+</launch>

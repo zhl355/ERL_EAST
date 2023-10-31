@@ -1,0 +1,5 @@
+<launch>  
+  <!--- Run rviz using config inside package -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find erl_moving_obstacle)/rviz/ref_gvn_movobs.rviz" />
+  <node name="plt_safety" pkg="rqt_multiplot" type="rqt_multiplot" args="--multiplot-config $(find debugging_ros_bag)/plot_config/safety_metric_and_act_gvn.xml --multiplot-run-all"/>
+</launch>

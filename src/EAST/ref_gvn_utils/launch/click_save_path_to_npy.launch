@@ -1,0 +1,7 @@
+<launch>
+  <!-- - click and save test passed -->
+  <node pkg="ref_gvn_utils" type="click_save_path_to_npy_node.py" name="path_saver"  output="screen">
+    <param name="path_topic" value="/path"/>
+    <param name="output_filename" value="debug_path"/>
+  </node>
+</launch>

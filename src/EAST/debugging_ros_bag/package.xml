@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>debugging_ros_bag</name>
+  <version>0.0.0</version>
+  <description>The debugging_ros_bag package for ros bag replay.</description>
+  <maintainer email="yiyz@todo.todo">yiyz</maintainer>
+  <license>BSD</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>erl_msgs</depend>
+  <depend>rospy</depend>
+</package>

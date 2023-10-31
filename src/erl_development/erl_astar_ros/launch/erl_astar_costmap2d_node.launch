@@ -1,0 +1,47 @@
+<launch>
+
+  <!-- <arg name="inflation_value" default="0.3" /> -->
+  <arg name="plan_freq" default="50.0"/>
+  <arg name="planning_frame" default="map" />
+  <!-- strictly greater this value will be considered as obstacle in planning -->
+  <arg name="planning_cutoff_cost" default="5" />
+  <arg name="planning_unknown_cost" default="3" />
+  <arg name="costmap_msg_unknown_cost" default="-1" />
+  <arg name="publish_custom_path" default="false" />
+  <arg name="log_output" default="screen" />
+  <arg name="check_gvn_on_unknown" default="false" />
+   
+
+  <!-- need 3 subscribers  -->
+  <!-- robot position from odom, planning start in 2d-->
+  <arg name="odom_topic" default="/odom" />
+  <!-- map to planning with -->
+  <arg name="costmap_topic" default="/costmap" />
+  <!-- planning goal in 2d, update use Rviz Nav Button -->
+  <arg name="goal_topic" default="/move_base_simple/goal" />
+  <!-- publish path at this path_topic -->
+  <arg name="path_topic" default="/path" />
+  <arg name="astar_eps" default="1.0" />
+ 
+  <!--- Run erl astar -->
+  <node name="erl_astar_ros" pkg="erl_astar_ros" type="erl_astar_costmap2d_online_node" output="$(arg log_output)" launch-prefix="">
+    <param name="plan_freq" value="$(arg plan_freq)"/>
+    <param name="planning_frame" value="$(arg planning_frame)"/>
+    <param name="odom_topic" value="$(arg odom_topic)"/>
+    <param name="path_topic" value="$(arg path_topic)"/>
+    <param name="costmap_topic" value="$(arg costmap_topic)"/>  
+    <param name="goal_topic" value="$(arg goal_topic)"/>
+
+    <!-- allow planning over unknown on costmap -->
+    <param name="costmap_msg_unknown_cost" value="$(arg costmap_msg_unknown_cost)"/>
+    <param name="planning_unknown_cost" value="$(arg planning_unknown_cost)"/>
+    <!-- inject hard inflation functionality by setting cutoff_cost (make exception for unknown) -->
+    <param name="planning_cutoff_cost" value="$(arg planning_cutoff_cost)"/>
+    <!-- publish custom path msg (planning_status + nav_msgs/Path) -->
+    <param name="publish_custom_path" value="$(arg publish_custom_path)"/>
+    <param name="astar_eps" value="$(arg astar_eps)"/>
+   
+  </node>
+
+</launch>
+

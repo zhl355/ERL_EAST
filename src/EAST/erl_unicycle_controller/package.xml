@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>erl_unicycle_controller</name>
+  <version>0.0.0</version>
+  <description>The unicycle_controller package for kinematic model of Jackal</description>
+
+  <maintainer email="hw@todo.todo">hw</maintainer>
+  <license>BSD</license>
+
+  <depend>ref_gvn_utils</depend>
+  <buildtool_depend>catkin</buildtool_depend>
+ 
+</package>

@@ -1,0 +1,5 @@
+<launch>
+    <!-- https://answers.ros.org/question/12577/when-should-i-need-clock-parameter-on-rosbag-play/ -->
+    <param name="use_sim_time" value="true" />
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find debugging_ros_bag)/rviz/examine_lidar3d.rviz" />
+</launch>

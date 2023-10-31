@@ -1,0 +1,31 @@
+# whether to use emergency stop topic from upstream to trigger emergency stop
+use_program_interrupt: true
+
+# if 'use_program_interrupt' is true, then the following parameter should be provided
+monitoring_topic: "/ref_gvn_emergency"
+
+# whether to allow human operator to trigger emergency stop, recommend to allow
+use_human_interrupt: false
+
+# if set to true, then human operator need to hold certain button to prevent emergency stop from being triggered
+# this flag does not take effect unless use_human_interrupt is set to true
+hold_to_run: true
+
+# config which axis to use on joystick to server as emergency stop trigger,
+# PS4 trigger R2 is 'joy_axes' 5
+joy_axes: 5
+
+# this setting is ONLY VALID if 'joy_axes' is not provided, which config which button to use on joystick,
+# PS4 button square is 'joy_buttons' 3
+joy_buttons: 3
+
+# --------- DO NOT MODIFY UNLESS CONFIDENT ---------
+# whether to use custom emergency stop topic, if set to true (not preferred), then the following parameters are needed
+use_custom_topic: false
+
+# ------ custom emergency stop topic setup begins ------
+monitoring_topic_msg_module: "erl_msgs.msg._RefGvnMsg"
+monitoring_topic_msg_type: "RefGvnMsg"
+program_interrupt_variable: "gvn_status"
+program_interrupt_threshold: 2
+# ------- custom emergency stop topic setup ends -------

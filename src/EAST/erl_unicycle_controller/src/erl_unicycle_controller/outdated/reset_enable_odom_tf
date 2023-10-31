@@ -1,0 +1,10 @@
+#!/bin/bash          
+#
+# Script to set dynamic configurable parameter [enable_odom_tf] to be true
+# Jan 31 2022
+# zhl@erl
+
+echo "reset enable_odom_tf = true using rosservice call"
+rosservice call /jackal_velocity_controller/set_parameters "config:    
+  bools:
+  - {name: 'enable_odom_tf', value: true}"

@@ -1,0 +1,162 @@
+<launch>
+  <arg name="x" default="0" />
+  <arg name="y" default="0" />
+  <arg name="z" default="0.4" />
+  <arg name="yaw" default="0" />
+  <arg name="world_filepath" default="$(find jackal_gazebo)/worlds/jackal_race_top_down.world" />
+
+  <arg name="map_frame" default="map" />
+
+  <arg name="lidar_frame" default="ouster_lidar" />
+
+  <arg name="scan_topic" default="front/scan"/>
+  <arg name="gvn_topic" default="/ref_gvn_status"/>
+  <arg name="dist_topic" default="/ref_gvn_dist"/>
+  <arg name="cloud_topic" default="/os1_cloud_node/points"/>
+  <arg name="cloud2d_topic" default="/cloud2d"/>
+  <arg name="gvn_restart_topic" default="/gvn_restart"/>
+
+  <arg name="ctrl_odom_topic" default="/scanmatch_odom"/>
+  <!-- <arg name="ctrl_odom_topic" default="/gazebo_p3d/odom"/> -->
+  <arg name="enable_controller" default="true"/>
+  <arg name="use_costmap" default="true"/>
+
+  <!-- arguments for grid map, costmap, planning, all bounds are inclusive --> 
+  <arg name="costmap_planning_obstacle_ub" default="19"/> 
+  <arg name="costmap_planning_upper_bound" value="15"/>
+  <arg name="costmap_planning_unknown" value="1"/>
+
+  <!-- Launch Gazebo with the specified world -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="debug" value="0" />
+    <arg name="gui" value="true" />
+    <arg name="use_sim_time" value="true" />
+    <arg name="world_name" value="$(arg world_filepath)" />
+  </include>
+
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="map_odom_transformer" args="0 0 0 0 0 0 1 map odom"/> -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="idendity_map" args="0 0 0 0 0 0 1 scanmatcher_frame base_link"/>
+
+  <!-- Spawn Jackal -->
+  <include file="$(find jackal_gazebo)/launch/spawn_jackal.launch">
+    <arg name="x" value="$(arg x)" />
+    <arg name="y" value="$(arg y)" />
+    <arg name="z" value="$(arg z)" />
+    <arg name="yaw" value="$(arg yaw)" />
+    <arg name="config" value="front_laser" />
+    <arg name="joystick" value="true" />
+    <arg name="keyboard" default="false" />
+    <arg name="enable_ekf" default="false" />
+  </include>
+
+  <!-- slam hector as mapping and localization does not use external odom-->
+  <include file="$(find jackal_gazebo)/launch/jackal_hector_map.launch">
+    <arg name="scan_topic" value="$(arg scan_topic)" />
+    <arg name="map_size" value="235" />
+    <arg name="map_resolution" value="0.1" />
+    <arg name="map_frame" value="$(arg map_frame)" />
+    <arg name="map_start_x" value="0.5"/>
+    <arg name="map_start_y" value="0.5"/>
+    <arg name="map_pub_period" value="0.04"/>
+  </include>
+
+  <!--- Run costmap computation -->
+  <node name="erl_costmap_ros" pkg="erl_costmap_ros" type="erl_costmap_ros_node" output="screen">
+    <param name="gridmsg_obstacle_lower_bound" value="80"/>
+    <param name="gridmsg_obstacle_upper_bound" value="100"/>
+    <param name="gridmsg_unknown" value="-1"/>
+
+    <param name="costmap_planning_robot_inscribed_radius" value="0.215"/>
+    <param name="costmap_planning_gamma" value="1.0"/>
+    <param name="costmap_planning_unknown" value="$(arg costmap_planning_unknown)"/>
+    <param name="costmap_planning_lethal" value="$(arg costmap_planning_obstacle_ub)"/>
+    <!-- <param name="costmap_planning_inscribed" value="$(eval arg('costmap_planning_obstacle_ub') - 1)"/> -->
+    <param name="costmap_planning_inscribed" value="$(arg costmap_planning_obstacle_ub)"/>
+    <param name="costmap_planning_cutoff_cost" value="$(arg costmap_planning_upper_bound)"/>
+
+    <param name="costmap_visualization_unknown" value="-1"/>
+    <param name="costmap_visualization_lethal" value="100"/>
+    <param name="costmap_visualization_inscribed" value="99"/>
+    <param name="costmap_visualization_planning_cutoff" value="-3"/>
+    <param name="costmap_visualization_zero_cost" value="0"/>
+  </node>
+
+  <!-- Planning A* on costmap -->
+  <include file="$(find erl_astar_ros)/launch/erl_astar_costmap2d_node.launch">
+    <arg name="planning_frame" value="$(arg map_frame)" />
+    <arg name="odom_topic" value="$(arg ctrl_odom_topic)" />
+    <arg name="log_output" value="log" />
+    <arg name="costmap_topic" value="/costmap" />
+
+    <arg name="planning_cutoff_cost" value="$(arg costmap_planning_upper_bound)" />
+    <arg name="costmap_msg_unknown_cost" value="$(arg costmap_planning_unknown)"/>
+    <arg name="planning_unknown_cost" value="$(arg costmap_planning_unknown)"/>
+    <arg name="publish_custom_path" value="true"/>
+    <arg name="astar_eps" value="1.0"/>
+
+  </include>
+
+  <!--- ref gvn sense node -->
+  <node pkg="ref_gvn_ros" type="ref_gvn_cone_dist_node.py" name="ref_gvn_cone"  output="log">
+    <param name="map_topic" value="/map"/>
+    <param name="map_frame" value="$(arg map_frame)"/>
+    <param name="gvn_topic" value="$(arg gvn_topic)"/>
+    <param name="dist_topic" value="$(arg dist_topic)"/>
+    <param name="odom_topic" value="$(arg ctrl_odom_topic)"/>
+    <param name="radius_offset" value="4.0"/>
+    <param name="pub_freq" value="50.0"/>
+
+    <!-- costmap related params -->
+    <param name="use_costmap" value="$(arg use_costmap)"/>
+    <param name="costmap_topic" value="/costmap"/>
+
+    <param name="costmap_cost_unknown" value="$(arg costmap_planning_unknown)"/>
+    <param name="costmap_free_lb" value="0"/>
+    <param name="costmap_free_ub" value="127"/>
+    <!-- costmap 16.9 value, corresponding to circumscribed radius 0.333m -->
+    <param name="costmap_obstacle_lb" value="17"/>
+    <param name="costmap_obstacle_ub" value="$(arg costmap_planning_obstacle_ub)"/>
+  </node>
+
+  <!--- Run reference governor -->
+  <node pkg="ref_gvn_ros" type="ref_gvn_node.py" name="ref_gvn" output="screen">
+    <param name="display_nav_path" value="true"/>
+    <param name="odom_topic" value="$(arg ctrl_odom_topic)"/>
+    <param name="path_topic" value="/path"/>
+    <param name="custom_path_topic" value="/erl_astar_ros/custom_path"/>
+    <param name="dist_topic" value="$(arg dist_topic)"/>
+    <param name="gvn_restart_topic" value="$(arg gvn_restart_topic)"/>
+    <!-- ref gvn core parameteres-->
+    <param name="ctrl_freq" value="50.0"/>
+    <param name="kg" value="2.0"/>
+  </node>
+
+  <!-- Emergency Stop -->
+  <node name="emergency_stop" pkg="stop_now" type="stop_now_node.py" output="screen">
+    <rosparam command="load" file="$(find stop_now)/config/default.yaml"/>
+  </node>
+
+  <group if="$(arg enable_controller)" >
+    <!--- Run cone controller as low level velocity controller -->
+    <node pkg="erl_unicycle_controller" type="unicycle_controller_node.py" name="cone_controller"  output="log">
+      <param name="odom_topic" value="$(arg ctrl_odom_topic)"/>
+      <param name="setpoint_topic" value="/ref_gvn/local_goal"/>
+      <param name="gvn_msg_topic" value="/ref_gvn_status"/>
+      <param name="ctrl_freq" value="50.0"/>
+      <param name="kv" value="0.5"/>
+      <param name="kw" value="1.5"/>
+      <!-- Control limits are set as the same as in control.yaml in jackal_control package -->
+      <!-- linear velocity limit m/sec-->
+      <param name="v_min" value="-0.01"/>
+      <param name="v_max" value="2.0"/>
+      <!-- angular velocity limit rad/sec-->
+      <param name="w_min" value="-2.0"/>
+      <param name="w_max" value="2.0"/>
+    </node>
+  </group >
+
+  <!--- Run rviz using config inside package -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find ref_gvn_ros)/rviz/ref_gvn_dummy.rviz" />
+  <node name="plt_safety" pkg="rqt_multiplot" type="rqt_multiplot" args="--multiplot-config $(find debugging_ros_bag)/plot_config/safety_metric_and_control_signal.xml --multiplot-run-all"/>
+  <node name="plt_llc" pkg="rqt_multiplot" type="rqt_multiplot" args="--multiplot-config $(find ref_gvn_ros)/plot/llc_debug.xml --multiplot-run-all"/>
+</launch>

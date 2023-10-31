@@ -1,0 +1,4 @@
+<launch>
+  <rosparam command="load" file="$(find stop_now)/config/default.yaml" />
+  <node name="emergency_stop" pkg="stop_now" type="stop_now_node.py" output="screen" />
+</launch>

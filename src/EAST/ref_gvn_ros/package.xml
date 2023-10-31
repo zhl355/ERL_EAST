@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>ref_gvn_ros</name>
+  <version>0.0.0</version>
+  <description>The ref_gvn_ros package</description>
+
+  <maintainer email="hw@todo.todo">hw</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>ref_gvn_core</depend>
+  <depend>ref_gvn_utils</depend>
+  <depend>erl_msgs</depend>
+
+  <exec_depend>pointcloud_to_laserscan</exec_depend>
+  <exec_depend>hector_mapping</exec_depend>
+
+</package>

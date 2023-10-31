@@ -1,0 +1,8 @@
+<launch>
+    <!-- https://answers.ros.org/question/12577/when-should-i-need-clock-parameter-on-rosbag-play/ -->
+    <param name="use_sim_time" value="true" />
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find debugging_ros_bag)/rviz/ref_gvn_ros.rviz" />
+    <node name="plt_safety" pkg="rqt_multiplot" type="rqt_multiplot" args="--multiplot-config $(find debugging_ros_bag)/plot_config/safety_metric_and_control_signal.xml --multiplot-run-all"/>
+    <node name="plt_gvn" pkg="rqt_multiplot" type="rqt_multiplot" args="--multiplot-config $(find debugging_ros_bag)/plot_config/governor_status.xml --multiplot-run-all"/>
+    <node name="plt_llc" pkg="rqt_multiplot" type="rqt_multiplot" args="--multiplot-config $(find debugging_ros_bag)/plot_config/low_level_controller.xml --multiplot-run-all"/>
+</launch>

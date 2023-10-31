@@ -1,0 +1,14 @@
+<launch>
+    <!-- https://answers.ros.org/question/12577/when-should-i-need-clock-parameter-on-rosbag-play/ -->
+    <param name="use_sim_time" value="true" />
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find debugging_ros_bag)/rviz/examine_ros_bag.rviz" />
+    <node name="plt_safety" pkg="rqt_multiplot" type="rqt_multiplot" args="--multiplot-config $(find debugging_ros_bag)/plot_config/safety_metric_and_err_code.xml --multiplot-run-all"/>
+    <node name="plt_llc" pkg="rqt_multiplot" type="rqt_multiplot" args="--multiplot-config $(find ref_gvn_ros)/plot/llc_debug.xml --multiplot-run-all"/>
+
+    <!-- - click and save test passed -->
+    <node pkg="grid_map_utils" type="test_grid_map_base_node.py" name="click_save_grid_msg"  output="screen">
+      <param name="map_topic" value="/map"/>
+      <param name="click_save_grid_map" value="true"/>
+    </node>
+
+</launch>

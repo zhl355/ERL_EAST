@@ -1,0 +1,34 @@
+#Configuation for robot odometry EKF
+#
+frequency: 50
+
+two_d_mode: true
+odom0: /jackal_velocity_controller/odom
+odom0_config: [false, false, false,
+               false, false, false,
+               true, false, false,
+               false, false, true,
+               false, false, false]
+odom0_differential: false
+
+# https://docs.ros.org/en/melodic/api/robot_localization/html/configuring_robot_localization.html
+# The order of the boolean values are 
+# X,		Y,		Z,
+# roll,	pitch,		yaw
+# Xdot,	Ydot,		Zdot,
+# roll_dot,	pitch_dot,	yaw_dot,
+# X_ddot,	Y_ddot,	Z_ddot
+
+imu0: /imu/data
+imu0_config: [false, false, false,
+              false, false, true,
+              false, false, false,
+              false, false, true,
+              true, false, false]
+imu0_differential: false
+
+odom_frame: odom
+base_link_frame: base_link
+world_frame: odom
+
+predict_to_current_time: true
